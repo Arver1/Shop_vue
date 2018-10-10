@@ -8,8 +8,105 @@
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 <body>
+  <div class="wrapper">
+    <div class="sample">
+      <input type="text" v-model="firstName">
+      <input type="text" v-model="lastName">
+      <input type="text" v-model="promo">
+      <hr>
+      <h2>Hello, {{ fullName }}</h2>
+      <div>Your sale is {{ sale }} %</div>
+      <hr>
+      <ul>
+        <li v-for="(num,index) of numbers"
+            v-on:mouseenter="onMouseEnter($event, index)"
+            v-on:mouseleave="onMouseLeave($event, index)"
+        >{{index}}-{{ num }}</li>
+      </ul>
+      <button class="btn btn-success" @click="addNumber">
+       Add number
+      </button>
+      <table class="table table-bordered">
+        <tr v-for="(value, key, i) in info" :key="key">
+          <td>{{ i }}</td>
+          <td>{{ key }}</td>
+          <td>{{ value }}</td>
+        </tr>
 
+      </table>
+      <!--<button class="btn btn-primary" @click="sortNumber">-->
+        <!--Sort-->
+      <!--</button>-->
+    </div>
+  </div>
 <script>
+  function getSale(code, callback){
+    let codes = {
+      newYear: 10,
+      some: 20
+    };
+
+    let sale = codes[code] !== undefined ? codes[code] : 0;
+
+    setTimeout(()=>{
+      callback(sale)
+    }, 3000)
+
+    console.log('Waiting 3s')
+  }
+  new Vue({
+    el: '.sample',
+    data:{
+      firstName: '',
+      lastName: '',
+      promo: '',
+      sale: '',
+      numbers: [],
+      info: {
+        name: 'Alex',
+        email: 'alex@mail.ru',
+      }
+    },
+    methods: {
+      addNumber(){
+        this.numbers.push(Math.floor(Math.random() * 10))
+        this.numbers.sort();
+      },
+      onMouseEnter(e, index){
+        if(!(index & 1))
+        e.target.style.color = 'red';
+      },
+      onMouseLeave(e, index){
+        if(!(index & 1))
+        e.target.style.color = 'black';
+      }
+      // sortNumber(){
+      //   this.numbers.sort();
+      // }
+    },
+    computed: {
+      fullName(){
+        return this.firstName + ' ' + this.lastName
+      },
+      // sale(){
+      //   return getSale(this.promo, (date)=>date)
+      // }
+    },
+    watch: {
+      promo(){
+        getSale(this.promo, (sale)=>
+          this.sale = sale)
+      }
+    }
+    // watch: {
+    //   firstName(){
+    //     this.fullName = this.firstName + ' ' + this.lastName
+    //   },
+    //   lastName(){
+    //     this.fullName = this.firstName + ' ' + this.lastName
+    //   }
+    // }
+  })
 </script>
 </body>
 </html>

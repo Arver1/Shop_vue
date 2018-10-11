@@ -53,8 +53,8 @@
       <div class="row justify-content-center">
         <div class="col-sm-4 col-lg-3">
           <span class="font-weight-bold mr-2"  @click="addGuest">Guests</span>
-          <button class="btn btn-primary"
-                  @click="addGuest($event)">+</button>
+          <input type="button" class="btn btn-primary"
+                  @click="addGuest" value="+">
         </div>
       </div>
       <div class="row justify-content-center"
@@ -85,7 +85,7 @@
               <template v-if="Array.isArray(field)">
                 <table class="table table-bordered">
                   <tr v-for="it of field">
-                    <td>{{ it.name }}</td>
+                    <td v-if="it.name">{{ it.name }}</td>
                   </tr>
                 </table>
               </template>

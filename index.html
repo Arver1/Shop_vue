@@ -14,7 +14,9 @@
       <div class="row justify-content-center" style="margin-bottom: 20px">
         <div class="col-sm-4 col-lg-3">
           <div class="progress">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" :style="progressBar"></div>
+            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                 :class="progressBar.width === '100%' ? 'bg-success' : null"
+                 role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" :style="progressBar"></div>
           </div>
         </div>
       </div>
@@ -31,22 +33,33 @@
                  aria-describedby="emailHelp"
                  placeholder="Enter email" required
                  @input="checkEmail"
+                 @invalid="validateEmail"
           >
           <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
         </div>
       </div>
       <div class="row justify-content-center">
         <div class="form-group col-sm-4 col-lg-3">
-          <label for="firstName" class="font-weight-bold">First Name</label>
-          <input v-model="formFields.firstName" class="form-control" type="text" placeholder="Enter First Name" id="firstName" required>
+          <label for="firstName" class="font-weight-bold">First Name
+            <i v-show="formFields.firstName.valid === '' ? false : !formFields.firstName.valid" class="fas fa-exclamation-circle" style="color: red"></i>
+            <i v-show="formFields.firstName.valid" class="fas fa-check-circle" style="color: green"></i>
+          </label>
+          <input v-model="formFields.firstName.value" class="form-control" type="text"
+                 placeholder="Enter First Name" id="firstName"
+                 @input="checkName"
+                 required>
         </div>
       </div>
       <div class="row justify-content-center">
         <div class="form-group col-sm-4 col-lg-3">
-          <label for="lastName" class="font-weight-bold">Last Name</label>
-          <input v-model="formFields.lastName"
+          <label for="lastName" class="font-weight-bold">Last Name
+            <i v-show="formFields.lastName.valid === '' ? false : !formFields.lastName.valid" class="fas fa-exclamation-circle" style="color: red"></i>
+            <i v-show="formFields.lastName.valid" class="fas fa-check-circle" style="color: green"></i>
+          </label>
+          <input v-model="formFields.lastName.value"
                  class="form-control" type="text"
                  placeholder="Enter Last Name" id="lastName"
+                 @input="checkName"
                  required
           >
         </div>
@@ -59,8 +72,9 @@
                  id="phone"
                  pattern="7-9[0-9]{2}-[0-9]{3}-[0-9]{2}-[0-9]{2}"
                  required
-                 v-model="formFields.phone"
+                 v-model="formFields.phone.value"
                  @invalid="validatePhone"
+                 @input="checkPhone"
           >
         </div>
       </div>
@@ -79,7 +93,8 @@
           <label :for='item.value'
                  @dblclick="removeGuest($event, index)"
                  class="font-weight-bold">Guest {{ index }}</label>
-          <input v-model="item.name" class="form-control" type="text" placeholder="Name" :id="item.value">
+          <input v-model="item.name" class="form-control" type="text" placeholder="Name" :id="item.value"
+          >
         </div>
       </div>
       <hr class="col-sm-4 col-lg-3">
@@ -103,7 +118,7 @@
                   </tr>
                 </table>
               </template>
-              <span v-else>{{ field }}</span>
+              <span v-else>{{ field.value }}</span>
             </td>
             <!--{{ Array.isArray(value) ? getTable(value) : value}}-->
           </tr>
@@ -120,12 +135,21 @@
     data: {
       showForm: true,
       formFields: {
-        firstName: '',
-        lastName: '',
-        phone: '',
+        firstName: {
+          value: '',
+          valid: ''
+        },
+        lastName: {
+          value: '',
+          valid: ''
+        },
+        phone: {
+          value: '',
+          valid: ''
+        },
         email: {
           value: '',
-          valid: false
+          valid: ''
         },
         guests: []
       },
@@ -137,6 +161,20 @@
       checkEmail(e){
         const reg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         this.formFields.email.valid = reg.test(e.target.value);
+        this.progressBarWidth();
+      },
+      checkName(e){
+        if(e.target.value === '') {
+          this.formFields[e.target.id].valid = false;
+        } else {
+          const reg = /[^a-zA-Zа-яёА-ЯЁ]/;
+          this.formFields[e.target.id].valid = !reg.test(e.target.value);
+        }
+        this.progressBarWidth();
+      },
+      checkPhone(e){
+        const reg = /7-9[0-9]{2}-[0-9]{3}-[0-9]{2}-[0-9]{2}/;
+        this.formFields.phone.valid = reg.test(e.target.value);
         this.progressBarWidth();
       },
       addGuest(e){
@@ -155,9 +193,23 @@
          e.preventDefault();
          this.showForm = !this.showForm;
       },
+      validateEmail(e){
+        if(e.target.validity.valueMissing){
+          e.target.setCustomValidity('Please fill out this field')
+        } else {
+          const reg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          if(!reg.test(e.target.value)){
+            e.target.setCustomValidity('An email address must contain a single @ and domain')
+          } else {
+            e.target.setCustomValidity('')
+          }
+        }
+      },
       validatePhone(e){
         if(e.target.validity.patternMismatch){
-          e.target.setCustomValidity('Форма должен быть 7-999-999-99-99');
+          e.target.setCustomValidity('Sample of phone 7-999-999-99-99');
+        } else if (e.target.validity.valueMissing){
+          e.target.setCustomValidity('Please fill out this field');
         } else {
           e.target.setCustomValidity('');
         }
@@ -167,6 +219,7 @@
         let value = 0;
         for(let field in this.formFields){
           if(this.formFields[field].valid) value++;
+          if(field === 'guests') continue;
           length++;
         }
         this.progressBar.width = `${value / length * 100}%`

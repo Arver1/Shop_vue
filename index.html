@@ -78,7 +78,7 @@
           >
         </div>
       </div>
-      <div class="row justify-content-center">
+      <div class="row justify-content-center" style="margin-bottom: 30px">
         <div class="col-sm-4 col-lg-3">
           <span class="font-weight-bold mr-2"  @click="addGuest">Guests</span>
           <input type="button" class="btn btn-primary"
@@ -97,10 +97,33 @@
           >
         </div>
       </div>
+      <div class="row justify-content-center">
+        <div class="col-sm-4 col-lg-3">
+          <div style="height: 250px; overflow: auto"
+               @scroll="checkScrollText"
+               :class="confirmation ? 'alert-success' : 'alert-danger'"
+               title="Be sure to read"
+          >
+            "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.
+          </div>
+          <div v-show="confirmation" class="form-check"><label>
+            <input type="checkbox"
+                   v-model="formFields.agreeText.valid"
+                   @change="progressBarWidth"
+                   class="form-check-input"><span>I agree this text</span></label></div>
+          <div v-show="confirmation" class="form-check"><label>
+            <input type="checkbox"
+                   v-model="formFields.getSpam.valid"
+                   @change="progressBarWidth"
+                   class="form-check-input"><span>Send me spam</span></label></div>
+        </div>
+      </div>
       <hr class="col-sm-4 col-lg-3">
       <div class="row justify-content-center">
         <div class="col-sm-4 col-lg-3">
-          <input type="submit" class="btn btn-success" value="Отправить">
+          <input type="submit" class="btn btn-success" value="Отправить"
+                 :disabled="!enableSubmit"
+          >
         </div>
       </div>
     </form>
@@ -118,7 +141,7 @@
                   </tr>
                 </table>
               </template>
-              <span v-else>{{ field.value }}</span>
+              <span v-else>{{ field.value || field.valid }}</span>
             </td>
             <!--{{ Array.isArray(value) ? getTable(value) : value}}-->
           </tr>
@@ -151,11 +174,18 @@
           value: '',
           valid: ''
         },
-        guests: []
+        guests: [],
+        agreeText: {
+          valid: false
+        },
+        getSpam: {
+          valid: false
+        }
       },
       progressBar: {
         width: 0
-      }
+      },
+      confirmation: false
     },
     methods: {
       checkEmail(e){
@@ -176,6 +206,9 @@
         const reg = /7-9[0-9]{2}-[0-9]{3}-[0-9]{2}-[0-9]{2}/;
         this.formFields.phone.valid = reg.test(e.target.value);
         this.progressBarWidth();
+      },
+      checkScrollText(e){
+        this.confirmation = (e.target.scrollTop+e.target.clientHeight === e.target.scrollHeight)
       },
       addGuest(e){
         e.preventDefault();
@@ -228,6 +261,9 @@
     computed: {
       guestsLength(){
         return this.formFields.guests.length
+      },
+      enableSubmit(){
+        return this.progressBar.width === '100%'
       }
     }
   })

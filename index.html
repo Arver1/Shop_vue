@@ -66,7 +66,10 @@
       </div>
       <div class="row justify-content-center">
         <div class="form-group col-sm-4 col-lg-3">
-          <label for="phone" class="font-weight-bold">Phone</label>
+          <label for="phone" class="font-weight-bold">Phone
+            <i v-show="formFields.phone.valid === '' ? false : !formFields.phone.valid" class="fas fa-exclamation-circle" style="color: red"></i>
+            <i v-show="formFields.phone.valid" class="fas fa-check-circle" style="color: green"></i>
+          </label>
           <input class="form-control" type="tel"
                  placeholder="7-999-999-99-99"
                  id="phone"
@@ -115,7 +118,20 @@
             <input type="checkbox"
                    v-model="formFields.getSpam.valid"
                    @change="progressBarWidth"
-                   class="form-check-input"><span>Send me spam</span></label></div>
+                   class="form-check-input"><span>Send me spam</span></label>
+          </div>
+          <div v-show="formFields.getSpam.valid" class="form-check"><label>
+            <input type="radio"
+                   v-model="formFields['spam on'].value"
+                   value="email"
+                   class="form-check-input"><span>Send me spam on email</span></label>
+          </div>
+          <div v-show="formFields.getSpam.valid" class="form-check"><label>
+            <input type="radio"
+                   v-model="formFields['spam on'].value"
+                   value="phone"
+                   class="form-check-input"><span>Send me spam on phone</span></label>
+          </div>
         </div>
       </div>
       <hr class="col-sm-4 col-lg-3">
@@ -180,6 +196,9 @@
         },
         getSpam: {
           valid: false
+        },
+        ['spam on']: {
+          value: 'email'
         }
       },
       progressBar: {
@@ -209,6 +228,10 @@
       },
       checkScrollText(e){
         this.confirmation = (e.target.scrollTop+e.target.clientHeight === e.target.scrollHeight)
+        if(!this.confirmation){
+          this.formFields.agreeText.valid = false;
+          this.formFields.getSpam.valid = false;
+        }
       },
       addGuest(e){
         e.preventDefault();
@@ -252,7 +275,7 @@
         let value = 0;
         for(let field in this.formFields){
           if(this.formFields[field].valid) value++;
-          if(field === 'guests') continue;
+          if(field === 'guests' || field === 'getSpam') continue;
           length++;
         }
         this.progressBar.width = `${value / length * 100}%`

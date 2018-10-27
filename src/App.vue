@@ -8,7 +8,7 @@
           </div>
           <div class="col col-sm-3">
             <div class="alert alert-default">
-              <div>In Cart: </div>
+              <div>In Cart: {{ lengthCnt }}</div>
             </div>
           </div>
         </div>
@@ -35,7 +35,9 @@
             </ul>
           </div>
           <div class="col col-sm-9">
-            <router-view></router-view>
+            <transition name="slide" mode="out-in">
+              <router-view></router-view>
+            </transition>
           </div>
         </div>
       </div>
@@ -49,6 +51,9 @@
     computed: {
       ...mapGetters('menu',{
         menuList: 'items'
+      }),
+      ...mapGetters('cart',{
+        lengthCnt: 'cnt'
       })
       // menuList(){
       //   return this.$store.getters['menu/items'];
